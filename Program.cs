@@ -64,15 +64,15 @@ class Administrator
             switch (Utils.ReadString("Your shois: "))
             {
                 case CommandAddBook:
-                    storage.AddBook(storage.GetCreatedBook());
+                    storage.CreateAndAddBook();
                     break;
 
                 case CommandDeleteBook:
-                    storage.RemoveBook(storage.GetSearchinBookById());
+                    storage.RemoveBookById();
                     break;
 
                 case CommandSearchBook:
-                    storage.ShowSerchingBooks(storage.GetSearchingBooks());
+                    storage.ShowSerchingBooks();
                     break;
 
                 case CommandShowAllBooks:
@@ -81,6 +81,10 @@ class Administrator
 
                 case CommandExit:
                     isRun = false;
+                    break;
+
+                default:
+                    Console.WriteLine("Incorrect input");
                     break;
             }
         }
@@ -101,7 +105,7 @@ class Storage
         _books.Add(book);
     }
 
-    public Book GetCreatedBook()
+    public void CreateAndAddBook()
     {
         string name = Utils.ReadString("Input name: ");
         string author = Utils.ReadString("Input author: ");
@@ -109,16 +113,40 @@ class Storage
         int quantytiPage = Utils.ReadInt("Input pages: ");
 
         Book book = new Book(name, author, year, quantytiPage);
-        return book;
+        _books.Add(book);
     }
 
-    public void RemoveBook(Book book)
+    public void ShowSerchingBooks()
     {
-        _books.Remove(book);
-    }
+        const string CommandName = "1";
+        const string CommandAuthor = "2";
+        const string CommandYear = "3";
 
-    public void ShowSerchingBooks(List<Book> serchingBooks)
-    {
+        List<Book> serchingBooks = null;
+
+        Console.WriteLine($"Menu: {CommandName}-Name;");
+        Console.WriteLine($"      {CommandAuthor}-Autor;");
+        Console.WriteLine($"      {CommandYear}-Year;");
+
+        switch (Utils.ReadString("Your shois: "))
+        {
+            case CommandName:
+                serchingBooks = GetSearchingBooksByName();
+                break;
+
+            case CommandAuthor:
+                serchingBooks = GetSearchingBooksByAuthor();
+                break;
+
+            case CommandYear:
+                serchingBooks = GetSearchingBooksByYear();
+                break;
+
+            default:
+                Console.WriteLine("Incorrect input");
+                break;
+        }
+
         if (serchingBooks.Count() == 0)
             return;
 
@@ -136,45 +164,17 @@ class Storage
             book.ShowData();
     }
 
-    public Book GetSearchinBookById()
+    public void RemoveBookById()
     {
         int id = Utils.ReadInt("Input ID: ");
 
         foreach (var book in _books)
         {
             if (book.IdActual == id)
-                return book;
+                _books.Remove(book);
         }
 
         Console.WriteLine("Book not find");
-        return null;
-    }
-
-    public List<Book> GetSearchingBooks()
-    {
-        const string CommandName = "1";
-        const string CommandAuthor = "2";
-        const string CommandYear = "3";
-
-        Console.WriteLine($"Menu: {CommandName}-Name;");
-        Console.WriteLine($"      {CommandAuthor}-Autor;");
-        Console.WriteLine($"      {CommandYear}-Year;");
-
-        switch (Utils.ReadString("Your shois: "))
-        {
-            case CommandName:
-                return GetSearchingBooksByName();
-
-            case CommandAuthor:
-                return GetSearchingBooksByAuthor();
-
-            case CommandYear:
-                return GetSearchingBooksByYear();
-
-            default:
-                Console.WriteLine("Incorrect input");
-                return null;
-        }
     }
 
     private List<Book> GetSearchingBooksByName()
@@ -231,12 +231,12 @@ class Storage
 
 class Book
 {
-    private static int _id = 0;
+    private static int s_id = 0;
     private int _quantytiPage;
 
     public Book(string name, string author, int year, int quantytiPage)
     {
-        IdActual = _id++;
+        IdActual = s_id++;
         Name = name;
         Author = author;
         Year = year;
