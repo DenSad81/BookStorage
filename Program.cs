@@ -49,7 +49,7 @@ class Program
                     break;
 
                 case CommandSearchBook:
-                    storage.ShowSerchingBook(storage.GetSerchingBooks());
+                    storage.ShowSerchingBooks(storage.GetSerchingBooks());
                     break;
 
                 case CommandShowAllBooks:
@@ -115,12 +115,15 @@ class Storage
         _books.Remove(book);
     }
 
-    public void ShowSerchingBook(List<Book> serchingBooks)
+    public void ShowSerchingBooks(List<Book> serchingBooks)
     {
         if (serchingBooks.Count() == 0)
             return;
 
-        ShowAllBooks();
+        Console.WriteLine("ID  Name Author Year Pages");
+
+        foreach (var book in serchingBooks)
+            book.ShowData();
     }
 
     public void ShowAllBooks()
