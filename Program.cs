@@ -18,7 +18,7 @@ class Program
         storage.AddBook(new Book("BBB", "bbb", 222, 22));
         storage.AddBook(new Book("EEE", "eee", 555, 55));
 
-        administrator.Procces(storage);
+        administrator.Work(storage);
     }
 }
 
@@ -45,7 +45,7 @@ static class Utils
 
 class Administrator
 {
-    public void Procces(Storage storage)
+    public void Work(Storage storage)
     {
         const string CommandAddBook = "1";
         const string CommandDeleteBook = "2";
@@ -70,11 +70,11 @@ class Administrator
                     break;
 
                 case CommandDeleteBook:
-                    storage.RemoveBook(GetSerchingBook(storage));
+                    storage.RemoveBook(GetBookByID(storage));
                     break;
 
                 case CommandSearchBook:
-                    storage.ShowSerchingBook(GetSerchingBook(storage));
+                    storage.ShowSerchingBook(GetSerchingBooks(storage));
                     break;
 
                 case CommandShowAllBooks:
@@ -97,9 +97,23 @@ class Administrator
 
         Book newBook = new Book(name, author, year, quantytiPage);
         return newBook;
-    }   
+    }
 
-    private List<Book> GetSerchingBook(Storage storage)
+    private Book GetBookByID(Storage storage)
+    {
+        int id = Utils.ReadInt("Input ID: ");
+
+        foreach (var book in storage.GetBooks())
+        {
+            if (book.IdActual == id)
+                return book;
+        }
+
+        Console.WriteLine("Book not find");
+        return null;
+    }
+
+    private List<Book> GetSerchingBooks(Storage storage)
     {
         const string CommandName = "1";
         const string CommandAuthor = "2";
@@ -112,13 +126,13 @@ class Administrator
         switch (Utils.ReadString("Your shois: "))
         {
             case CommandName:
-                return GetSerchingBookByName(storage);
+                return GetSerchingBooksByName(storage);
 
             case CommandAuthor:
-                return GetSerchingBookByAuthor(storage);
+                return GetSerchingBooksByAuthor(storage);
 
             case CommandYear:
-                return GetSerchingBookByYear(storage);
+                return GetSerchingBooksByYear(storage);
 
             default:
                 Console.WriteLine("Incorrect input");
@@ -126,12 +140,12 @@ class Administrator
         }
     }
 
-    private List<Book> GetSerchingBookByName(Storage storage)
+    private List<Book> GetSerchingBooksByName(Storage storage)
     {
         string key = Utils.ReadString("Input what you search by name: ");
         List<Book> findedBooks = new List<Book>();
 
-        foreach (var book in storage.Books)
+        foreach (var book in storage.GetBooks())
         {
             if (book.CheckPresenceByName(key))
                 findedBooks.Add(book);
@@ -143,12 +157,12 @@ class Administrator
         return findedBooks;
     }
 
-    private List<Book> GetSerchingBookByAuthor(Storage storage)
+    private List<Book> GetSerchingBooksByAuthor(Storage storage)
     {
         string key = Utils.ReadString("Input what you search by autor: ");
         List<Book> findedBooks = new List<Book>();
 
-        foreach (var book in storage.Books)
+        foreach (var book in storage.GetBooks())
         {
             if (book.CheckPresenceByAuthor(key))
                 findedBooks.Add(book);
@@ -160,12 +174,12 @@ class Administrator
         return findedBooks;
     }
 
-    private List<Book> GetSerchingBookByYear(Storage storage)
+    private List<Book> GetSerchingBooksByYear(Storage storage)
     {
         string key = Utils.ReadString("Input what you search by year: ");
         List<Book> findedBooks = new List<Book>();
 
-        foreach (var book in storage.Books)
+        foreach (var book in storage.GetBooks())
         {
             if (book.CheckPresenceByYear(key))
                 findedBooks.Add(book);
@@ -180,22 +194,26 @@ class Administrator
 
 class Storage
 {
-    public List<Book> Books { get; private set; }
+    private List<Book> _books;
 
     public Storage()
     {
-        Books = new List<Book>();
+        _books = new List<Book>();
+    }
+
+    public List<Book> GetBooks()
+    {
+        return _books;
     }
 
     public void AddBook(Book book)
     {
-        Books.Add(book);
+        _books.Add(book);
     }
 
-    public void RemoveBook(List<Book> books)
+    public void RemoveBook(Book book)
     {
-        foreach (var book in books)
-            Books.Remove(book);
+        _books.Remove(book);
     }
 
     public void ShowSerchingBook(List<Book> serchingBooks)
@@ -203,23 +221,21 @@ class Storage
         if (serchingBooks.Count() == 0)
             return;
 
-        Console.WriteLine("Name Author Year Pages");
-
-        foreach (var book in serchingBooks)
-            book.ShowData();
+        ShowAllBooks();
     }
 
     public void ShowAllBooks()
     {
-        Console.WriteLine("Name Author Year Pages");
+        Console.WriteLine("ID  Name Author Year Pages");
 
-        foreach (var book in Books)
+        foreach (var book in _books)
             book.ShowData();
     }
 }
 
 class Book
 {
+    private static int _id = 0;
     private string _name;
     private string _author;
     private int _year;
@@ -227,15 +243,18 @@ class Book
 
     public Book(string name, string author, int year, int quantytiPage)
     {
+        IdActual = _id++;
         _name = name;
         _author = author;
         _year = year;
         _quantytiPage = quantytiPage;
     }
 
+    public int IdActual { get; private set; }
+
     public void ShowData()
     {
-        Console.WriteLine($"{_name}  {_author}    {_year}  {_quantytiPage}");
+        Console.WriteLine($"{IdActual}   {_name}  {_author}    {_year}  {_quantytiPage}");
     }
 
     public bool CheckPresenceByName(string key)
